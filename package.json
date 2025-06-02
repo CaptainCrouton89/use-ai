@@ -1,0 +1,33 @@
+{
+  "name": "run_parallel_tasks",
+  "version": "1.0.0",
+  "description": "Run multiple tasks in parallel",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "run_parallel_tasks": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod 755 dist/index.js",
+    "start": "node dist/index.js",
+    "install-server": "tsc && chmod 755 dist/index.js && node scripts/update-config.js",
+    "install-cursor": "tsc && chmod 755 dist/index.js && node scripts/update-config.js cursor",
+    "install-desktop": "tsc && chmod 755 dist/index.js && node scripts/update-config.js desktop",
+    "install-code": "tsc && chmod 755 dist/index.js && node scripts/update-config.js code"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^1.2.12",
+    "@ai-sdk/openai": "^1.3.22",
+    "@modelcontextprotocol/sdk": "^1.2.0",
+    "ai": "^4.3.16",
+    "axios": "^1.6.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
