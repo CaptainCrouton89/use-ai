@@ -1,41 +1,39 @@
-# MCP Server Boilerplate
+# MCP Server for Async Claude Code
 
-A starter template for building MCP (Model Context Protocol) servers. This boilerplate provides a clean foundation for creating your own MCP server that can integrate with Claude, Cursor, or other MCP-compatible AI assistants.
+An MCP (Model Context Protocol) server that enables asynchronous Claude Code execution. This server allows AI assistants like Claude, Cursor, or other MCP-compatible tools to run Claude Code commands in the background and save results for later retrieval.
 
 ## Purpose
 
-This boilerplate helps you quickly start building:
+This MCP server provides:
 
-- Custom tools for AI assistants
-- Resource providers for dynamic content
-- Prompt templates for common operations
-- Integration points for external APIs and services
+- **Async Claude Code Execution**: Run Claude Code commands in the background without blocking the AI assistant
+- **File-based Results**: Automatically saves command outputs to JSON files in an `async-claude` directory
+- **Project Context**: Supports project-relative file paths using `@` notation for better context awareness
+- **Background Processing**: Commands run independently, allowing for long-running operations (up to 5 minutes)
 
 ## Features
 
-- Simple "hello-world" tool example
+- Background execution of Claude Code commands
+- Automatic output file management with incremental naming
+- Project root context for file path resolution
+- JSON output format for structured results
+- Error handling and validation
 - TypeScript support with proper type definitions
-- Easy installation scripts for different MCP clients
-- Clean project structure ready for customization
 
 ## How It Works
 
-This MCP server template provides:
+The server exposes a single tool `claude-code-async` that:
 
-1. A basic server setup using the MCP SDK
-2. Example tool implementation
-3. Build and installation scripts
-4. TypeScript configuration for development
-
-The included example demonstrates how to create a simple tool that takes a name parameter and returns a greeting.
+1. Takes a prompt and project root directory as input
+2. Creates an `async-claude` directory in the project root
+3. Generates a unique output filename (`claude-0.json`, `claude-1.json`, etc.)
+4. Executes the Claude Code command in the background
+5. Returns immediately with the output file path
+6. Saves the actual Claude Code response to the file when complete
 
 ## Getting Started
 
 ```bash
-# Clone the boilerplate
-git clone <your-repo-url>
-cd mcp-server-boilerplate
-
 # Install dependencies
 pnpm install
 
@@ -48,7 +46,7 @@ pnpm start
 
 ## Installation Scripts
 
-This boilerplate includes convenient installation scripts for different MCP clients:
+Install the MCP server for different clients:
 
 ```bash
 # For Claude Desktop
@@ -64,16 +62,56 @@ pnpm run install-code
 pnpm run install-server
 ```
 
-These scripts will build the project and automatically update the appropriate configuration files.
+## Usage
 
-## Usage with Claude Desktop
+Once installed, the AI assistant can use the `claude-code-async` tool:
 
-The installation script will automatically add the configuration, but you can also manually add it to your `claude_desktop_config.json` file:
+**Parameters:**
+
+- `prompt`: The prompt to send to Claude Code, including file paths using `@directory/file` notation
+- `projectRoot`: Absolute path to the project root directory
+
+**Example:**
+
+```
+Use the claude-code-async tool with:
+- prompt: "Analyze the code structure in @src/handlers and suggest improvements"
+- projectRoot: "/Users/username/my-project"
+```
+
+The tool will:
+
+1. Start Claude Code in the background
+2. Return the output file path immediately
+3. Save results to `/Users/username/my-project/async-claude/claude-X.json`
+
+## File Path Notation
+
+Use `@` to reference files relative to the project root:
+
+- `@src/index.ts` → `/project/root/src/index.ts`
+- `@package.json` → `/project/root/package.json`
+- `@docs/api.md` → `/project/root/docs/api.md`
+
+## Output Format
+
+Results are saved as JSON files in the `async-claude` directory with incremental naming:
+
+- `claude-0.json` - First command
+- `claude-1.json` - Second command
+- `claude-2.json` - Third command
+- etc.
+
+## Configuration
+
+### Claude Desktop
+
+Add to your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "your-server-name": {
+    "use-ai": {
       "command": "node",
       "args": ["/path/to/your/dist/index.js"]
     }
@@ -81,117 +119,45 @@ The installation script will automatically add the configuration, but you can al
 }
 ```
 
-Then restart Claude Desktop to connect to the server.
+### Cursor
 
-## Customizing Your Server
-
-### Adding Tools
-
-Tools are functions that the AI assistant can call. Here's the basic structure:
-
-```typescript
-server.tool(
-  "tool-name",
-  "Description of what the tool does",
-  {
-    // Zod schema for parameters
-    param1: z.string().describe("Description of parameter"),
-    param2: z.number().optional().describe("Optional parameter"),
-  },
-  async ({ param1, param2 }) => {
-    // Your tool logic here
-    return {
-      content: [
-        {
-          type: "text",
-          text: "Your response",
-        },
-      ],
-    };
-  }
-);
-```
-
-### Adding Resources
-
-Resources provide dynamic content that the AI can access:
-
-```typescript
-server.resource(
-  "resource://example/{id}",
-  "Description of the resource",
-  async (uri) => {
-    // Extract parameters from URI
-    const id = uri.path.split("/").pop();
-
-    return {
-      contents: [
-        {
-          uri,
-          mimeType: "text/plain",
-          text: `Content for ${id}`,
-        },
-      ],
-    };
-  }
-);
-```
-
-### Adding Prompts
-
-Prompts are reusable templates:
-
-```typescript
-server.prompt(
-  "prompt-name",
-  "Description of the prompt",
-  {
-    // Parameters for the prompt
-    topic: z.string().describe("The topic to discuss"),
-  },
-  async ({ topic }) => {
-    return {
-      description: `A prompt about ${topic}`,
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: `Please help me with ${topic}`,
-          },
-        },
-      ],
-    };
-  }
-);
-```
+The installation script will automatically configure Cursor's MCP settings.
 
 ## Project Structure
 
 ```
 ├── src/
-│   └── index.ts          # Main server implementation
-├── scripts/              # Installation and utility scripts
-├── dist/                 # Compiled JavaScript (generated)
-├── package.json          # Project configuration
-├── tsconfig.json         # TypeScript configuration
-└── README.md            # This file
+│   ├── handlers/
+│   │   └── claude-code.ts    # Main Claude Code handler
+│   ├── services/
+│   │   └── file-system.ts    # File system operations
+│   ├── utils/               # Utility functions
+│   └── index.ts             # MCP server setup
+├── scripts/                 # Installation scripts
+├── async-claude/            # Generated output directory
+├── dist/                    # Compiled JavaScript
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
 ## Development
 
-1. Make changes to `src/index.ts`
+1. Make changes to the source files
 2. Run `pnpm run build` to compile
-3. Test your server with `pnpm start`
-4. Use the installation scripts to update your MCP client configuration
+3. Test with `pnpm start`
+4. Use installation scripts to update MCP client configurations
 
-## Next Steps
+## Requirements
 
-1. Update `package.json` with your project details
-2. Customize the server name and tools in `src/index.ts`
-3. Add your own tools, resources, and prompts
-4. Integrate with external APIs or databases as needed
+- Node.js (for running the MCP server)
+- Claude Code CLI tool installed and accessible in PATH
+- MCP-compatible AI assistant (Claude Desktop, Cursor, etc.)
 
 ## License
 
 MIT
+
+:)
+:(
+:(

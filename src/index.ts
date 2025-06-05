@@ -1,22 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ClaudeCodeHandler, claudeCodeSchema } from "./handlers/claude-code.js";
-import { ParallelTasksHandler } from "./handlers/parallel-tasks.js";
 
 const server = new McpServer({
   name: "ai-response-mcp",
   version: "1.0.0",
 });
 
-const parallelTasksHandler = new ParallelTasksHandler();
 const claudeCodeHandler = new ClaudeCodeHandler();
-
-// server.tool(
-//   "run-parallel-tasks",
-//   "Generate parallel AI responses",
-//   parallelTasksSchema,
-//   async (input) => parallelTasksHandler.execute(input)
-// );
 
 server.tool(
   "claude-code-async",
