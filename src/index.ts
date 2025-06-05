@@ -11,7 +11,7 @@ const claudeCodeHandler = new ClaudeCodeHandler();
 
 server.tool(
   "claude-code-async",
-  "Run Claude Code commands in background",
+  "Run a single Claude Code command in the background. Use this tool multiple times to run multiple commands in parallel.",
   claudeCodeSchema,
   async (input) => claudeCodeHandler.execute(input)
 );

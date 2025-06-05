@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build Commands
 
 - `pnpm build` - Compile TypeScript to JavaScript in `dist/` directory
-- `pnpm start` - Run the compiled MCP server
+- `pnpm start` - Run the compiled MCP server (rarely needed)
 - `pnpm install-desktop` - Build and install to Claude Desktop config
 - `pnpm install-cursor` - Build and install to Cursor config
 - `pnpm install-code` - Build and install to Claude Code config
@@ -35,6 +35,7 @@ The server provides a `claude-code-async` tool that:
 ### Security Model
 
 File system access is restricted to:
+
 - User's home directory (`~/`)
 - Current working directory
 - Specified project root
@@ -44,6 +45,7 @@ All paths are validated through `PathValidator` before file system operations.
 ### Tool Interface
 
 The `claude-code-async` tool accepts:
+
 - `prompt`: The command to send to Claude Code (required). Use `@` notation to reference files and directories relative to the project root
 - `projectRoot`: Absolute path to your project directory (required)
 
