@@ -9,40 +9,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm install-desktop` - Build and install to Claude Desktop config
 - `pnpm install-cursor` - Build and install to Cursor config
 - `pnpm install-code` - Build and install to Claude Code config
+- `pnpm install-server` - Install to all platforms
 
 ## Architecture Overview
 
-This is an MCP (Model Context Protocol) server that provides a `run-parallel-tasks` tool for generating AI responses in parallel with file context support.
+This is an MCP (Model Context Protocol) server that provides a `claude-code-async` tool for asynchronous execution of Claude Code commands in the background.
 
 ### Core Components
 
 - **MCP Server** (`src/index.ts`): Main server entry point using `@modelcontextprotocol/sdk`
-- **ParallelTasksHandler** (`src/handlers/parallel-tasks.ts`): Core business logic for parallel AI task execution
-- **ModelProvider** (`src/config/models.ts`): Model configuration and abstraction layer supporting OpenAI and Anthropic
+- **ClaudeCodeHandler** (`src/handlers/claude-code.ts`): Core handler for async Claude Code execution
 - **FileSystemService** (`src/services/file-system.ts`): Secure file system operations with path validation
 - **PathValidator** (`src/utils/path-validator.ts`): Security layer restricting file access to home directory and current working directory
 
-### Model Types
+### How It Works
 
-The server supports multiple model tiers:
-- `ultra-light`, `light`, `medium`, `heavy` - General purpose models
-- `reasoning:medium`, `reasoning:heavy` - Reasoning-focused models  
-- `code:medium`, `code:heavy` - Code-focused models with specialized system prompts
+The server provides a `claude-code-async` tool that:
+
+1. **Executes Claude Code commands in the background** using `nohup`
+2. **Saves results to `async-claude/claude-{id}.json`** in your project root
+3. **Returns immediately** with the output file path
+4. **Handles file references** using `@` notation (e.g., `@src/index.ts`)
+5. **Commands can run up to 5 minutes** and continue even if the MCP server stops
 
 ### Security Model
 
 File system access is restricted to:
 - User's home directory (`~/`)
 - Current working directory
+- Specified project root
 
 All paths are validated through `PathValidator` before file system operations.
 
 ### Tool Interface
 
-The `run-parallel-tasks` tool accepts:
-- `prompts`: Array of prompts to execute in parallel
-- `model`: Model type from supported enum
-- `relevant-files`: Optional array of file paths for context
-- `relevant-directories`: Optional array of directory paths for context
+The `claude-code-async` tool accepts:
+- `prompt`: The command to send to Claude Code (required). Use `@` notation to reference files and directories relative to the project root
+- `projectRoot`: Absolute path to your project directory (required)
 
-Responses are formatted with status indicators and separators for readability.
+Output is saved to `{projectRoot}/async-claude/claude-{id}.json` with auto-incrementing IDs.
