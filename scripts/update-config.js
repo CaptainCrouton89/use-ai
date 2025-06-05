@@ -247,7 +247,7 @@ if (claudeSuccess || cursorSuccess || claudeCodeSuccess) {
   console.log("");
   console.log("📖 Usage:");
   console.log(
-    "   You can now use the 'run_parallel_tasks' tool to run multiple tasks in parallel"
+    "   You can now use the 'claude-code-async' tool to run claude code in the background"
   );
   console.log("   with optional file contexts.");
 } else {
