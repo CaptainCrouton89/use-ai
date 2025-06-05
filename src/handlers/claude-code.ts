@@ -48,9 +48,6 @@ export class ClaudeCodeHandler {
       const validatedPath =
         await this.fileSystemService.validateAndPrepareFilePath(fullOutputPath);
 
-      // // Write initial "working" message to output file
-      // await this.fileSystemService.writeFile(validatedPath, "working... check back later");
-
       // Escape the prompt for shell safety
       const escapedPrompt = prompt
         .replace(/"/g, '\\"')
